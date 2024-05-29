@@ -1,0 +1,16 @@
+version: '3.4'
+
+services:
+  apigateway:
+    image: ${DOCKER_REGISTRY-}apigateway
+    networks:
+        - backend
+    build:
+      context: .
+      dockerfile: APIGateway/Dockerfile
+
+networks:
+  backend:
+    name: backend
+    external: true
+    driver: bridge
