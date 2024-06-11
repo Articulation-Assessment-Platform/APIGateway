@@ -1,0 +1,121 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.x
+
+      - name: Restore dependencies
+        run: dotnet restore 'APIGateway/APIGateway/APIGateway.csproj'
+
+      - name: Build
+        run: dotnet build 'APIGateway/APIGateway/APIGateway.csproj' --no-restore --configuration Release
+  sonarqube:
+    needs: build
+    name: Build and analyze
+    runs-on: windows-latest
+    steps:
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: 17
+          distribution: 'zulu' # Alternative distribution options are available.
+  
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
+  
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+  
+      - name: Cache SonarCloud scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v3
+        with:
+          path: ./.sonar/scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+  
+      - name: Install SonarCloud scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+          New-Item -Path ./.sonar/scanner -ItemType Directory
+          dotnet tool update dotnet-sonarscanner --tool-path ./.sonar/scanner
+  
+      - name: Build and analyze
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        shell: powershell
+        run: |
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"Articulation-Assessment-Platform_User-Service" /o:"articulation-assessment-platform" /d:sonar.token=${{ secrets.SONAR_TOKEN }} /d:sonar.host.url="https://sonarcloud.io" 
+          dotnet build 'APIGateway/APIGateway/APIGateway.csproj' --no-incremental
+          ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token=${{ secrets.SONAR_TOKEN }}
+
+  docker:
+    needs: sonarqube
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+  
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+  
+      - name: Log in to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+  
+      - name: Create Docker network
+        run: docker network create backend
+  
+      - name: Build Docker Compose services
+        run: docker-compose -f "APIGateway/docker-compose.yml" build
+  
+      - name: Publish Docker images
+        run: |
+          docker tag userservice:latest 11112002/userservice:latest
+          docker push 11112002/userservice:latest
+  
+      - name: Clean up Docker containers
+        run: docker-compose -f "APIGateway/docker-compose.yml" down
+  
+  deploy:
+    needs: docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Azure Login
+        run: az login --service-principal -u ${{ secrets.AZURE_CLIENT_ID }} -p ${{ secrets.AZURE_CLIENT_SECRET }} --tenant ${{ secrets.AZURE_TENANT_ID }}
+
+      - name: Set Kubeconfig
+        run: az aks get-credentials --resource-group 'Articulation-Assessment-Platform' --name 'aks-articulation'
+
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f "APIGateway/APIGateway/deployment.yml"
+          kubectl apply -f "APIGateway/APIGateway/service.yml"
