@@ -70,7 +70,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          ./.sonar/scanner/dotnet-sonarscanner begin /k:"Articulation-Assessment-Platform_User-Service" /o:"articulation-assessment-platform" /d:sonar.token=${{ secrets.SONAR_TOKEN }} /d:sonar.host.url="https://sonarcloud.io" 
+          ./.sonar/scanner/dotnet-sonarscanner begin /k:"Articulation-Assessment-Platform_APIGateway" /o:"articulation-assessment-platform" /d:sonar.token=${{ secrets.SONAR_TOKEN }} /d:sonar.host.url="https://sonarcloud.io" 
           dotnet build 'APIGateway/APIGateway/APIGateway.csproj' --no-incremental
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token=${{ secrets.SONAR_TOKEN }}
 
