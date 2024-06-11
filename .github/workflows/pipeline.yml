@@ -96,8 +96,8 @@ jobs:
   
       - name: Publish Docker images
         run: |
-          docker tag userservice:latest 11112002/userservice:latest
-          docker push 11112002/userservice:latest
+          docker tag apigateway:latest 11112002/apigateway:latest
+          docker push 11112002/apigateway:latest
   
       - name: Clean up Docker containers
         run: docker-compose -f "APIGateway/docker-compose.yml" down
