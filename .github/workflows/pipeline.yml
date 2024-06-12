@@ -117,5 +117,4 @@ jobs:
 
       - name: Apply Kubernetes manifests
         run: |
-          kubectl apply -f "APIGateway/APIGateway/deployment.yml"
-          kubectl apply -f "APIGateway/APIGateway/service.yml"
+          kubectl apply -f "APIGateway/APIGateway/aks-manifest.yml"
