@@ -15,7 +15,8 @@ spec:
     spec:
       containers:
       - name: apigateway
-        image: 11112002/apigateway:latest
+        image: 11112002/apigateway
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         resources:
