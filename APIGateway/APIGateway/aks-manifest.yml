@@ -18,7 +18,21 @@ spec:
         image: 11112002/apigateway
         imagePullPolicy: Always
         ports:
-        - containerPort: 8080
+          - containerPort: 8000
+            name: proxy
+            protocol: TCP
+        env:
+          - name: ASPNETCORE_URLS
+            value: http://*:8000;
+        volumeMounts:
+          - name: yarp-config
+            mountPath: /app/yarp.json
+            subPath: yarp.json
+        volumes:
+          - name: yarp-config
+            configMap:
+              name: yarp-config
+
         resources:
           requests:
             memory: "128Mi"
@@ -38,6 +52,6 @@ spec:
     app: apigateway
   ports:
     - protocol: TCP
-      port: 8080
-      targetPort: 8080
+      port: 80
+      targetPort: 8000
   type: LoadBalancer

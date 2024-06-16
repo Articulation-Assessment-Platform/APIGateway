@@ -1,0 +1,68 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: yarp-config
+data:
+  yarp.json: |
+    {     
+    "ReverseProxy": {
+        "Routes": {
+          "users-route": {
+            "ClusterId": "users-cluster",
+            "Match": {
+              "Path": "users-api/{**catch-all}"
+            },
+            "Transforms": [
+              {
+                "PathPattern": "{**catch-all}"
+              }
+            ]
+          },
+          "auth-route": {
+            "ClusterId": "auth-cluster",
+            "Match": {
+              "Path": "auth-api/{**catch-all}"
+            },
+            "Transforms": [
+              {
+                "PathPattern": "{**catch-all}"
+              }
+            ]
+          },
+          "forums-route": {
+            "ClusterId": "forums-cluster",
+            "Match": {
+              "Path": "forums-api/{**catch-all}"
+            },
+            "Transforms": [
+              {
+                "PathPattern": "{**catch-all}"
+              }
+            ]
+          }
+        },
+        "Clusters": {
+          "users-cluster": {
+            "Destinations": {
+              "destination1": {
+                "Address": "http://user-service.default.svc.cluster.local:5110"
+              }
+            }
+          },
+          "auth-cluster": {
+            "Destinations": {
+              "destination1": {
+                "Address": "http://auth-service.default.svc.cluster.local:5330"
+              }
+            }
+          },
+          "forums-cluster": {
+            "Destinations": {
+              "destination1": {
+                "Address": "http://forum-service.default.svc.cluster.local:5220"
+              }
+            }
+          }
+        }
+      }
+    }

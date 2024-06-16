@@ -16,6 +16,7 @@ builder.Services.AddCors(options =>
 
 });
 
+builder.Configuration.AddJsonFile("yarp.json", optional: false, reloadOnChange: true);
 builder.Services.AddReverseProxy()
     .LoadFromConfig(builder.Configuration.GetSection("ReverseProxy"));
 
