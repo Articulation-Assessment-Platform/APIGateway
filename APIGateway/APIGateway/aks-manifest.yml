@@ -28,19 +28,17 @@ spec:
             - name: yarp-config
               mountPath: /app/yarp.json
               subPath: yarp.json
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "250m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
       volumes:
         - name: yarp-config
           configMap:
             name: yarp-config
-
-        resources:
-          requests:
-            memory: "128Mi"
-            cpu: "250m"
-          limits:
-            memory: "256Mi"
-            cpu: "500m"
-
 ---
 
 apiVersion: v1
