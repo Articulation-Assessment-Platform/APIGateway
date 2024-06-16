@@ -120,4 +120,5 @@ jobs:
         run: kubectl apply -f "APIGateway/APIGateway/config-map.yml"
 
       - name: Apply Kubernetes manifests
-        run: kubectl apply -f "APIGateway/APIGateway/aks-manifest.yml"
+        run: kubectl delete -f "APIGateway/APIGateway/aks-manifest.yml" && kubectl apply -f "APIGateway/APIGateway/aks-manifest.yml"
+
