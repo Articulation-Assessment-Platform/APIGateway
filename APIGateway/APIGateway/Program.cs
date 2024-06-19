@@ -9,12 +9,12 @@ builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
     {
-        builder.WithOrigins("http://4.182.169.87:8080")
+        builder.AllowAnyOrigin()
                .AllowAnyMethod()
                .AllowAnyHeader();
     });
-
 });
+
 
 builder.Configuration.AddJsonFile("yarp.json", optional: false, reloadOnChange: true);
 builder.Services.AddReverseProxy()
