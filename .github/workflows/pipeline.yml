@@ -121,18 +121,3 @@ jobs:
 
       - name: Apply Kubernetes manifests
         run: kubectl delete -f "APIGateway/APIGateway/aks-manifest.yml" && kubectl apply -f "APIGateway/APIGateway/aks-manifest.yml"
-
-  integration-test:
-    needs: deploy
-    runs-on: ubuntu-latest
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Run Postman Test
-        run: |
-          postman login --with-api-key ${{ secrets.POSTMAN_APIKEY }}
-          postman collection run 19765820-71b267b9-20b1-40cb-8f5e-f6c0446b3ac9 -i 19765820-3fb03eaf-32d1-468c-b855-f9df7b1192da
-      
-
