@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: apigateway
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: apigateway
@@ -30,10 +30,10 @@ spec:
           resources:
             requests:
               memory: "128Mi"
-              cpu: "100m"  
+              cpu: "250m"
             limits:
               memory: "256Mi"
-              cpu: "250m"
+              cpu: "500m"
       volumes:
         - name: yarp-config
           configMap:
